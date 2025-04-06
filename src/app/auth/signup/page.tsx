@@ -5,9 +5,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useAuth } from '@/contexts/auth-context'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AlertCircle, CheckCircle2 } from 'lucide-react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useRouter } from 'next/navigation'
 
 export default function SignupPage() {
   const [email, setEmail] = React.useState('')
@@ -16,19 +17,14 @@ export default function SignupPage() {
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState('')
   const [success, setSuccess] = React.useState('')
-  const [profile, setProfile] = React.useState<any>(null)
-  const auth = useAuth()
+  const router = useRouter()
+  const supabase = createClientComponentClient()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
     setError('')
     setSuccess('')
-
-    const formData = new FormData(e.currentTarget)
-    const email = formData.get('email') as string
-    const password = formData.get('password') as string
-    const fullName = formData.get('fullName') as string
 
     if (!email || !password) {
       setError('Email and password are required')
@@ -37,26 +33,34 @@ export default function SignupPage() {
     }
 
     try {
-      const { error, data } = await auth.signUp(email, password, fullName)
+      // Sign up with Supabase
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName
+          }
+        }
+      })
       
       if (error) {
-        setError(error.message)
-        return
+        throw error
       }
 
       // If signup is successful but email is not confirmed
       if (data?.user) {
         setSuccess(
-          `Check your email (${email}) for a confirmation link. You'll need to confirm your email before logging in.`
+          `Account created successfully! You can now log in.`
         )
         
         // Redirect to login after a delay
         setTimeout(() => {
-          window.location.href = '/auth/login'
-        }, 5000)  // Give user time to read the message
+          router.push('/auth/login')
+        }, 3000)  // Give user time to read the message
       }
-    } catch (error) {
-      setError('An unexpected error occurred during signup')
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred during signup')
     } finally {
       setLoading(false)
     }
@@ -120,7 +124,7 @@ export default function SignupPage() {
           )}
 
           {success && (
-            <Alert variant="success" className="mt-4">
+            <Alert className="mt-4 bg-green-50 border border-green-200 text-green-700">
               <CheckCircle2 className="h-4 w-4" />
               <AlertDescription>{success}</AlertDescription>
             </Alert>

@@ -6,59 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Icons } from '@/components/ui/icons'
 import { Badge } from '@/components/ui/badge'
-
-interface NetworkActivity {
-  id: string
-  timestamp: string
-  type: 'inbound' | 'outbound'
-  protocol: string
-  source: string
-  destination: string
-  status: 'normal' | 'suspicious' | 'blocked'
-}
-
-const mockActivities: NetworkActivity[] = [
-  {
-    id: '1',
-    timestamp: new Date().toISOString(),
-    type: 'inbound',
-    protocol: 'TCP',
-    source: '192.168.1.100',
-    destination: '10.0.0.5',
-    status: 'normal',
-  },
-  {
-    id: '2',
-    timestamp: new Date().toISOString(),
-    type: 'outbound',
-    protocol: 'UDP',
-    source: '10.0.0.5',
-    destination: '8.8.8.8',
-    status: 'normal',
-  },
-  {
-    id: '3',
-    timestamp: new Date().toISOString(),
-    type: 'inbound',
-    protocol: 'TCP',
-    source: '203.0.113.0',
-    destination: '10.0.0.5',
-    status: 'suspicious',
-  },
-]
+import { NetworkActivity } from '@/components/network-monitor/network-activity'
 
 export default function NetworkMonitorPage() {
   const router = useRouter()
-  const [activities, setActivities] = useState<NetworkActivity[]>([])
   const [monitoring, setMonitoring] = useState(false)
-
-  useEffect(() => {
-    if (monitoring) {
-      setActivities(mockActivities)
-    } else {
-      setActivities([])
-    }
-  }, [monitoring])
 
   return (
     <div className="container mx-auto p-6">
@@ -99,48 +51,32 @@ export default function NetworkMonitorPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Network Activity</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Icons.network className="h-5 w-5" />
+              Network Performance
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            {activities.length > 0 ? (
-              <div className="space-y-4">
-                {activities.map((activity) => (
-                  <div
-                    key={activity.id}
-                    className="flex items-center justify-between p-4 border rounded-lg"
-                  >
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium">
-                        {activity.type === 'inbound' ? 'Inbound' : 'Outbound'}{' '}
-                        {activity.protocol}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {activity.source} → {activity.destination}
-                      </p>
-                    </div>
-                    <Badge
-                      variant={
-                        activity.status === 'suspicious'
-                          ? 'destructive'
-                          : activity.status === 'blocked'
-                          ? 'secondary'
-                          : 'outline'
-                      }
-                    >
-                      {activity.status}
-                    </Badge>
-                  </div>
-                ))}
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary">Bandwidth</Badge>
+                  <span className="text-sm text-muted-foreground">1.2 Gbps</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary">Latency</Badge>
+                  <span className="text-sm text-muted-foreground">25ms</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary">Packet Loss</Badge>
+                  <span className="text-sm text-muted-foreground">0.1%</span>
+                </div>
               </div>
-            ) : (
-              <p className="text-sm text-gray-500">
-                {monitoring
-                  ? 'No network activity detected'
-                  : 'Start monitoring to see network activity'}
-              </p>
-            )}
+            </div>
           </CardContent>
         </Card>
+
+        <NetworkActivity />
       </div>
     </div>
   )

@@ -1,25 +1,17 @@
-'use client'
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 
-import { useAuth } from '@/contexts/auth-context'
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
-
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const { session, user } = useAuth()
-  const router = useRouter()
+  const supabase = createServerComponentClient({ cookies })
+  const { data: { session } } = await supabase.auth.getSession()
 
-  useEffect(() => {
-    if (!session || !user) {
-      router.replace('/auth/login')
-    }
-  }, [session, user, router])
-
-  if (!session || !user) {
-    return null
+  if (!session) {
+    redirect('/auth/login')
   }
 
   return (

@@ -2,9 +2,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { Metadata } from 'next'
 import { ThemeProvider } from '@/components/theme-provider'
-import { Toaster } from '@/components/ui/toaster'
-import { ChatBot } from '@/components/ai-assistant/chat-bot'
-import { AuthProvider } from '@/contexts/auth-context'
+import { Providers } from './providers'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,7 +18,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head />
       <body className={inter.className} suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
@@ -28,11 +25,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthProvider>
+          <Providers>
             {children}
-            <ChatBot />
-            <Toaster />
-          </AuthProvider>
+          </Providers>
         </ThemeProvider>
       </body>
     </html>

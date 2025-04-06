@@ -5,15 +5,29 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Icons } from '@/components/ui/icons'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { User } from '@supabase/auth-helpers-nextjs'
 
-export function DashboardContent() {
+interface DashboardContentProps {
+  user: User | null
+}
+
+export function DashboardContent({ user }: DashboardContentProps) {
   const router = useRouter()
+  const supabase = createClientComponentClient()
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    router.push('/auth/login')
+    router.refresh()
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Security Dashboard</h1>
-        <Button variant="outline" onClick={() => router.push('/auth/signout')}>
+        <Button variant="outline" onClick={handleSignOut}>
           Sign Out
         </Button>
       </div>

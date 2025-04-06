@@ -31,6 +31,7 @@ export function ChatBot() {
   ])
   const [input, setInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const handleSend = async () => {
     if (!input.trim()) return
@@ -67,55 +68,79 @@ export function ChatBot() {
   }
 
   return (
-    <Card className="fixed bottom-4 right-4 w-96 h-[500px] flex flex-col shadow-lg">
-      <CardHeader className="border-b">
-        <CardTitle className="flex items-center gap-2">
-          <Icons.shield className="h-5 w-5" />
-          AI Assistant
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="flex-1 overflow-auto p-4 space-y-4">
-        <div className="space-y-4">
-          {messages.map(message => (
-            <div
-              key={message.id}
-              className={cn(
-                'flex w-max max-w-[80%] rounded-lg px-3 py-2',
-                message.role === 'user'
-                  ? 'ml-auto bg-primary text-primary-foreground'
-                  : 'bg-muted'
-              )}
-            >
-              {message.content}
+    <div className="fixed bottom-4 right-4 z-50">
+      {/* Minimized Icon */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-10 w-10 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90"
+        onClick={() => setIsModalOpen(true)}
+      >
+        <Icons.shield className="h-4 w-4" />
+      </Button>
+
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-end justify-end p-4">
+          <Card className="w-96 h-[500px] flex flex-col">
+            <CardHeader className="border-b flex items-center justify-between p-2">
+              <CardTitle className="flex items-center gap-2">
+                <Icons.shield className="h-5 w-5" />
+                AI Assistant
+              </CardTitle>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setIsModalOpen(false)}
+              >
+                <Icons.close className="h-4 w-4" />
+              </Button>
+            </CardHeader>
+            <CardContent className="flex-1 overflow-auto p-4 space-y-4">
+              <div className="space-y-4">
+                {messages.map(message => (
+                  <div
+                    key={message.id}
+                    className={cn(
+                      'flex w-max max-w-[80%] rounded-lg px-3 py-2',
+                      message.role === 'user'
+                        ? 'ml-auto bg-primary text-primary-foreground'
+                        : 'bg-muted'
+                    )}
+                  >
+                    {message.content}
+                  </div>
+                ))}
+                {isTyping && (
+                  <div className="flex items-center gap-2 text-muted-foreground w-max rounded-lg px-3 py-2 bg-muted">
+                    <Icons.loading className="h-4 w-4 animate-spin" />
+                    Typing...
+                  </div>
+                )}
+              </div>
+            </CardContent>
+            <div className="p-4 border-t">
+              <form
+                onSubmit={e => {
+                  e.preventDefault()
+                  handleSend()
+                }}
+                className="flex gap-2"
+              >
+                <Input
+                  value={input}
+                  onChange={e => setInput(e.target.value)}
+                  placeholder="Type a message..."
+                  className="flex-1"
+                />
+                <Button type="submit" size="icon">
+                  <Icons.send className="h-4 w-4" />
+                </Button>
+              </form>
             </div>
-          ))}
-          {isTyping && (
-            <div className="flex items-center gap-2 text-muted-foreground w-max rounded-lg px-3 py-2 bg-muted">
-              <Icons.spinner className="h-4 w-4 animate-spin" />
-              Typing...
-            </div>
-          )}
+          </Card>
         </div>
-      </CardContent>
-      <div className="p-4 border-t">
-        <form
-          onSubmit={e => {
-            e.preventDefault()
-            handleSend()
-          }}
-          className="flex gap-2"
-        >
-          <Input
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            placeholder="Type a message..."
-            className="flex-1"
-          />
-          <Button type="submit" size="icon">
-            <Icons.arrowRight className="h-4 w-4" />
-          </Button>
-        </form>
-      </div>
-    </Card>
+      )}
+    </div>
   )
 }

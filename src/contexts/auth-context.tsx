@@ -1,7 +1,6 @@
 'use client'
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Session, User } from '@supabase/supabase-js'
 
@@ -27,18 +26,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
 
   const handleAuthStateChange = async (event: string, newSession: Session | null) => {
     console.log('Auth state changed:', { event, newSession })
     setSession(newSession)
     setUser(newSession?.user ?? null)
-
-    if (event === 'SIGNED_IN' && newSession) {
-      router.push('/dashboard')
-    } else if (event === 'SIGNED_OUT') {
-      router.push('/auth/login')
-    }
   }
 
   useEffect(() => {
@@ -62,9 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       subscription.unsubscribe()
     }
-  }, [router])
-
-
+  }, [])
 
   const signUp = async (email: string, password: string): Promise<void> => {
     try {
@@ -88,8 +78,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw err
     }
   }
-
-
 
   const signIn = async (email: string, password: string): Promise<void> => {
     try {
@@ -131,16 +119,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
       throw err
-    }
-  }
-
-  const resetPassword = async (email: string) => {
-    try {
-      const { data, error } = await supabase.auth.resetPasswordForEmail(email)
-      return { data: { user: null, session: null }, error }
-    } catch (error) {
-      console.error('Password reset error:', error)
-      return { data: null, error: error instanceof Error ? error : new Error('An error occurred') }
     }
   }
 
